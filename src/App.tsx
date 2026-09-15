@@ -79,6 +79,18 @@ function useEdgeUi() {
       }, 2200);
     };
     const mousemove = (event: MouseEvent) => {
+      const mouseX = (event.clientX / window.innerWidth) * 100;
+      const mouseY = (event.clientY / window.innerHeight) * 100;
+      document.documentElement.style.setProperty('--light-x', `${mouseX}%`);
+      document.documentElement.style.setProperty('--light-y', `${mouseY}%`);
+      document.documentElement.style.setProperty(
+        '--light-x-inverse',
+        `${100 - mouseX}%`
+      );
+      document.documentElement.style.setProperty(
+        '--light-y-inverse',
+        `${100 - mouseY}%`
+      );
       const nearEdge =
         event.clientY < 92 ||
         event.clientX < 92 ||
@@ -113,10 +125,24 @@ function useSectionReveal() {
   }, []);
 }
 
+function useHasScrolled() {
+  const [hasScrolled, setHasScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => setHasScrolled(window.scrollY > 0);
+    handleScroll();
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return hasScrolled;
+}
+
 const App = () => {
   const [loginOpen, setLoginOpen] = useState(false);
   const [resultVisible, setResultVisible] = useState(false);
   const edgeActive = useEdgeUi();
+  const hasScrolled = useHasScrolled();
   useSectionReveal();
   return (
     <>
@@ -139,7 +165,6 @@ const App = () => {
           </button>
         </header>
         <div className="side-note">PEOPLE · TECHNOLOGY · WELLNESS</div>
-        <div className="bottom-note">scroll to discover</div>
       </div>
       <section className="hero" id="top">
         <div className="brandmark">
@@ -149,7 +174,9 @@ const App = () => {
             <small>by</small> LCC Group
           </span>
         </div>
-        <div className="hero-hint">scroll or move to the edge</div>
+        <div className={`hero-hint${hasScrolled ? ' is-hidden' : ''}`}>
+          scroll or move to the edge
+        </div>
       </section>
       <main className="content shell">
         {sections.map((section) => (
