@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Brandmark from './components/Brandmark';
 import './styles.css';
 
 const products = [
@@ -167,13 +168,7 @@ const App = () => {
         <div className="side-note">PEOPLE · TECHNOLOGY · WELLNESS</div>
       </div>
       <section className="hero" id="top">
-        <div className="brandmark">
-          AUXILIA
-          <div className="hairline" />
-          <span className="sub">
-            <small>by</small> LCC Group
-          </span>
-        </div>
+        <Brandmark />
         <div className={`hero-hint${hasScrolled ? ' is-hidden' : ''}`}>
           scroll or move to the edge
         </div>
