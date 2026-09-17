@@ -5,10 +5,6 @@
   --line: rgba(73, 64, 54, 0.14);
   --shadow: 0 30px 90px rgba(73, 64, 54, 0.06);
   --max: 1120px;
-  --light-x: 50%;
-  --light-y: 50%;
-  --light-x-inverse: 50%;
-  --light-y-inverse: 50%;
   --page-background: radial-gradient(
       circle at 22% 18%,
       rgba(255, 255, 255, 0.82),
@@ -202,8 +198,9 @@ input {
   display: grid;
   isolation: isolate;
   font-size: clamp(74px, 13vw, 168px);
+  font-family: Baskerville, "Times New Roman", "Cormorant Garamond", serif;
   font-weight: 400;
-  letter-spacing: .035em;
+  letter-spacing: .055em;
   line-height: 0.9;
   text-align: center;
   user-select: none;
@@ -212,44 +209,31 @@ input {
   position: relative;
   grid-area: 1 / 1;
   z-index: 1;
-  color: transparent;
-  background-clip: text;
-  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.68);
+  color: #9da4a7;
 }
-.brandmark-face {
-  background-color: #757c80;
-  background-image: linear-gradient(
-    115deg,
-    transparent 41%,
-    rgba(255, 255, 255, 0.1) 46%,
-    rgba(255, 255, 255, 0.74) 50%,
-    rgba(255, 255, 255, 0.18) 53%,
-    transparent 59%
-  );
-  background-position: var(--light-x-inverse) var(--light-y-inverse);
-  background-size: 220% 220%;
+.silver-wordmark {
+  position: relative;
+  display: block;
+  white-space: nowrap;
 }
-.brandmark-face::after {
-  content: "";
+.silver-size {
+  visibility: hidden;
+}
+.silver-wordmark svg {
   position: absolute;
   inset: 0;
-  pointer-events: none;
-  /* Sample the same full-logo background, revealing only the divider. */
-  background-color: inherit;
-  background-image: inherit;
-  background-position: inherit;
-  background-size: inherit;
-  clip-path: inset(
-    var(--line-top, 100%) var(--line-right, 0px) var(--line-bottom, 0px)
-      var(--line-left, 0px)
-  );
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  text-shadow: none;
 }
 .brandmark .sub {
   display: block;
   margin-top: 22px;
   color: inherit;
-  font-size: clamp(18px, 2.6vw, 33px);
-  font-style: italic;
+  font-size: clamp(16px, 2.1vw, 27px);
+  font-style: normal;
+  letter-spacing: .08em;
 }
 .brandmark .sub small {
   font-size: .78em;
@@ -260,7 +244,8 @@ input {
   width: 72px;
   height: 1px;
   margin: 18px auto 0;
-  box-shadow: 0 1px 1px rgba(255, 255, 255, 0.68);
+  background: #b4babc;
+  box-shadow: 0 .5px .5px rgba(65, 73, 79, 0.13);
 }
 .hero-hint {
   position: absolute;
@@ -582,7 +567,7 @@ footer {
     font-size: clamp(42px, 16vw, 118px);
   }
   .brandmark .sub {
-    font-size: 20px;
+    font-size: clamp(15px, 3.6vw, 20px);
   }
   .footer-grid {
     align-items: flex-start;

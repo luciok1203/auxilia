@@ -81,18 +81,6 @@ function useEdgeUi() {
       }, 2200);
     };
     const mousemove = (event: MouseEvent) => {
-      const mouseX = (event.clientX / window.innerWidth) * 100;
-      const mouseY = (event.clientY / window.innerHeight) * 100;
-      document.documentElement.style.setProperty('--light-x', `${mouseX}%`);
-      document.documentElement.style.setProperty('--light-y', `${mouseY}%`);
-      document.documentElement.style.setProperty(
-        '--light-x-inverse',
-        `${100 - mouseX}%`
-      );
-      document.documentElement.style.setProperty(
-        '--light-y-inverse',
-        `${100 - mouseY}%`
-      );
       const nearEdge =
         event.clientY < 92 ||
         event.clientX < 92 ||
