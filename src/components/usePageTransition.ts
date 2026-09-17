@@ -20,6 +20,19 @@ function createPageTransition() {
     cancelAnimationFrame(frame);
     moving = false;
   };
+  const remember = () => {
+    if (!moving) target = nearest();
+  };
+  const realign = () => {
+    if (document.documentElement.dataset.menuLocked) return;
+    cancel();
+    const element = pages()[target];
+    if (element)
+      window.scrollTo({
+        top: window.scrollY + element.getBoundingClientRect().top,
+        behavior: 'instant',
+      });
+  };
   const navigateToPage = (requested: number, force = false) => {
     if (document.documentElement.dataset.menuLocked) return;
     if (!window.matchMedia('(max-width: 860px)').matches) return;
@@ -50,6 +63,8 @@ function createPageTransition() {
     pages,
     nearest,
     cancel,
+    remember,
+    realign,
     navigateToPage,
     isMoving: () => moving,
     selected: () => (moving ? target : nearest()),
@@ -65,14 +80,31 @@ export default function usePageTransition() {
     const media = window.matchMedia('(max-width: 860px)');
     const previous = root.dataset.pageNavigation;
     root.dataset.pageNavigation = 'managed';
-    const resize = () => {
-      if (media.matches) transition.navigateToPage(transition.selected(), true);
-      else transition.cancel();
+    let width = window.innerWidth;
+    let height = window.innerHeight;
+    transition.remember();
+    const remember = () => {
+      // Ignore scroll events caused by layout changes until resize realigns us.
+      if (
+        media.matches &&
+        !root.dataset.menuLocked &&
+        window.innerWidth === width &&
+        window.innerHeight === height
+      )
+        transition.remember();
     };
+    const resize = () => {
+      if (media.matches) transition.realign();
+      else transition.cancel();
+      width = window.innerWidth;
+      height = window.innerHeight;
+    };
+    window.addEventListener('scroll', remember, { passive: true });
     window.addEventListener('resize', resize);
     media.addEventListener('change', resize);
     return () => {
       transition.cancel();
+      window.removeEventListener('scroll', remember);
       if (previous === undefined) delete root.dataset.pageNavigation;
       else root.dataset.pageNavigation = previous;
       window.removeEventListener('resize', resize);

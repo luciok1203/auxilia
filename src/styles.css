@@ -595,6 +595,13 @@ footer {
 
 /* The document remains the only scroll container on mobile. */
 @media (max-width: 860px) {
+  :root {
+    --mobile-usable-height: calc(
+      100dvh -
+      env(safe-area-inset-top, 0px) -
+      env(safe-area-inset-bottom, 0px)
+    );
+  }
   html[data-page-navigation="managed"] {
     scroll-snap-type: none;
     scroll-behavior: auto;
@@ -661,7 +668,7 @@ footer {
     margin-bottom: 8px;
   }
   h2 {
-    font-size: clamp(28px, 4.8dvh, 42px);
+    font-size: clamp(27px, calc(var(--mobile-usable-height) * 0.048), 42px);
     line-height: 1.12;
   }
   .bodycopy {
@@ -699,7 +706,7 @@ footer {
   }
   .product {
     min-height: 0;
-    padding: clamp(6px, 1.3dvh, 12px) 10px;
+    padding: clamp(5px, calc(var(--mobile-usable-height) * 0.009), 12px) 10px;
   }
   .product .name {
     font-size: 19px;
@@ -739,7 +746,7 @@ footer {
   .step {
     grid-template-columns: 30px 1fr;
     gap: 10px;
-    padding: 10px 0;
+    padding: clamp(5px, calc(var(--mobile-usable-height) * 0.012), 10px) 0;
   }
   .step .num {
     font-size: 21px;

@@ -1,11 +1,9 @@
-import { useEffect, useRef, useState } from 'react';
+import { memo, useEffect, useRef, useState } from 'react';
 import type { PageTransition } from './usePageTransition';
 
 const items = ['About', 'LifeWave', 'Products', 'Survey', 'Business'];
 
-export default function MobileMenu({
-  transition,
-}: { transition: PageTransition }) {
+function MobileMenu({ transition }: { transition: PageTransition }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const container = useRef<HTMLDivElement>(null);
   const toggle = useRef<HTMLButtonElement>(null);
@@ -17,6 +15,7 @@ export default function MobileMenu({
     if (menuOpen) {
       pending.current = undefined;
       if (!unlock.current) {
+        const page = transition.selected();
         transition.cancel();
         const root = document.documentElement;
         const body = document.body;
@@ -57,7 +56,11 @@ export default function MobileMenu({
           background.forEach((el, index) => {
             el.inert = inert[index];
           });
-          window.scrollTo({ top: y, behavior: 'instant' });
+          const section = transition.pages()[page];
+          const restoredY = section
+            ? window.scrollY + section.getBoundingClientRect().top
+            : y;
+          window.scrollTo({ top: restoredY, behavior: 'instant' });
         };
       }
       toggle.current?.focus({ preventScroll: true });
@@ -183,3 +186,5 @@ export default function MobileMenu({
     </div>
   );
 }
+
+export default memo(MobileMenu);

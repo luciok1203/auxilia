@@ -13,7 +13,15 @@ export default function useMobileSwipe(transition: PageTransition) {
         )
       );
     let gesture:
-      | { x: number; y: number; index: number; committed: boolean }
+      | {
+          x: number;
+          y: number;
+          index: number;
+          committed: boolean;
+          time: number;
+          lastTime: number;
+          delta: number;
+        }
       | undefined;
     let wheelTimer: ReturnType<typeof setTimeout> | undefined;
     let wheelDelta = 0;
@@ -38,6 +46,9 @@ export default function useMobileSwipe(transition: PageTransition) {
         y: touch.clientY,
         index: transition.selected(),
         committed: false,
+        time: performance.now(),
+        lastTime: performance.now(),
+        delta: 0,
       };
     };
     const move = (event: TouchEvent) => {
@@ -57,6 +68,8 @@ export default function useMobileSwipe(transition: PageTransition) {
       }
       // Stop native momentum before it can move the page or start another easing.
       event.preventDefault();
+      gesture.delta = delta;
+      gesture.lastTime = performance.now();
       const threshold = Math.min(80, Math.max(48, window.innerHeight * 0.12));
       if (!gesture.committed && Math.abs(delta) >= threshold) {
         gesture.committed = true;
@@ -64,6 +77,21 @@ export default function useMobileSwipe(transition: PageTransition) {
       }
     };
     const end = () => {
+      if (gesture && !gesture.committed) {
+        const speed =
+          Math.abs(gesture.delta) /
+          Math.max(1, gesture.lastTime - gesture.time);
+        if (
+          Math.abs(gesture.delta) >= 24 &&
+          speed > 0.5 &&
+          performance.now() - gesture.lastTime < 100
+        ) {
+          transition.navigateToPage(gesture.index + Math.sign(gesture.delta));
+        }
+      }
+      gesture = undefined;
+    };
+    const cancelGesture = () => {
       gesture = undefined;
     };
     const wheel = (event: WheelEvent) => {
@@ -89,7 +117,7 @@ export default function useMobileSwipe(transition: PageTransition) {
       if (!wheelTimer) {
         wheelIndex = transition.selected();
         wheelDelta = 0;
-        wheelCommitted = transition.isMoving();
+        wheelCommitted = false;
       }
       clearTimeout(wheelTimer);
       wheelTimer = setTimeout(() => {
@@ -162,7 +190,8 @@ export default function useMobileSwipe(transition: PageTransition) {
     window.addEventListener('touchstart', start, { passive: true });
     window.addEventListener('touchmove', move, { passive: false });
     window.addEventListener('touchend', end);
-    window.addEventListener('touchcancel', end);
+    window.addEventListener('touchcancel', cancelGesture);
+    window.addEventListener('resize', cancelGesture);
     window.addEventListener('wheel', wheel, { passive: false });
     window.addEventListener('click', click);
     window.addEventListener('keydown', key);
@@ -171,7 +200,8 @@ export default function useMobileSwipe(transition: PageTransition) {
       window.removeEventListener('touchstart', start);
       window.removeEventListener('touchmove', move);
       window.removeEventListener('touchend', end);
-      window.removeEventListener('touchcancel', end);
+      window.removeEventListener('touchcancel', cancelGesture);
+      window.removeEventListener('resize', cancelGesture);
       window.removeEventListener('wheel', wheel);
       window.removeEventListener('click', click);
       window.removeEventListener('keydown', key);

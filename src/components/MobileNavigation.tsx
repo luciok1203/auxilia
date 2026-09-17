@@ -21,13 +21,14 @@ export default function MobileNavigation() {
   useEffect(() => {
     const media = window.matchMedia('(max-width: 860px)');
     let frame = 0;
+    let lastActive = -1;
+    const elements = pages.map(([id]) => document.getElementById(id));
     const measure = () => {
       frame = 0;
       if (!media.matches) return;
       let nearest = 0;
       let distance = Number.POSITIVE_INFINITY;
-      pages.forEach(([id], index) => {
-        const element = document.getElementById(id);
+      elements.forEach((element, index) => {
         if (!element) return;
         const offset = Math.abs(element.getBoundingClientRect().top);
         if (offset < distance) {
@@ -35,7 +36,10 @@ export default function MobileNavigation() {
           nearest = index;
         }
       });
-      setActive(nearest);
+      if (lastActive !== nearest) {
+        lastActive = nearest;
+        setActive(nearest);
+      }
     };
     const schedule = () => {
       if (!frame) frame = requestAnimationFrame(measure);
