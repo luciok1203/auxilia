@@ -169,7 +169,7 @@ const App = () => {
       <section className="hero" id="top">
         <Brandmark />
         <div className={`hero-hint${hasScrolled ? ' is-hidden' : ''}`}>
-          scroll or move to the edge
+          scroll<span className="hero-hint-desktop"> or move to the edge</span>
         </div>
       </section>
       <main className="content shell">

@@ -21,6 +21,12 @@ export default function useMobileSwipe(transition: PageTransition) {
     let wheelCommitted = false;
     const start = (event: TouchEvent) => {
       if (
+        document.documentElement.dataset.menuLocked ||
+        (event.target instanceof Element &&
+          event.target.closest('.mobile-menu'))
+      )
+        return;
+      if (
         !media.matches ||
         event.touches.length !== 1 ||
         excluded(event.target)
@@ -61,6 +67,7 @@ export default function useMobileSwipe(transition: PageTransition) {
       gesture = undefined;
     };
     const wheel = (event: WheelEvent) => {
+      if (document.documentElement.dataset.menuLocked) return;
       if (
         media.matches &&
         event.target instanceof Element &&

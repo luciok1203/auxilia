@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import MobileMenu from './MobileMenu';
 import useMobileSwipe from './useMobileSwipe';
 import usePageScrubber from './usePageScrubber';
 import usePageTransition from './usePageTransition';
@@ -60,22 +61,25 @@ export default function MobileNavigation() {
   }, []);
 
   return (
-    <nav
-      ref={ref}
-      className={`mobile-pagination${scrubbing ? ' is-scrubbing' : ''}`}
-      aria-label="섹션 이동: 길게 누른 뒤 좌우로 드래그하여 탐색"
-    >
-      {pages.map(([id, label], index) => (
-        <a
-          href={`#${id}`}
-          draggable={false}
-          key={id}
-          aria-label={`${index + 1}. ${label}`}
-          aria-current={active === index ? 'location' : undefined}
-        >
-          <span />
-        </a>
-      ))}
-    </nav>
+    <>
+      <MobileMenu transition={transition} />
+      <nav
+        ref={ref}
+        className={`mobile-pagination${scrubbing ? ' is-scrubbing' : ''}`}
+        aria-label="섹션 이동: 길게 누른 뒤 좌우로 드래그하여 탐색"
+      >
+        {pages.map(([id, label], index) => (
+          <a
+            href={`#${id}`}
+            draggable={false}
+            key={id}
+            aria-label={`${index + 1}. ${label}`}
+            aria-current={active === index ? 'location' : undefined}
+          >
+            <span />
+          </a>
+        ))}
+      </nav>
+    </>
   );
 }

@@ -21,6 +21,7 @@ function createPageTransition() {
     moving = false;
   };
   const navigateToPage = (requested: number, force = false) => {
+    if (document.documentElement.dataset.menuLocked) return;
     if (!window.matchMedia('(max-width: 860px)').matches) return;
     const list = pages();
     if (!list.length) return;
