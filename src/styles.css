@@ -591,6 +591,14 @@ footer {
 
 /* The document remains the only scroll container on mobile. */
 @media (max-width: 860px) {
+  html[data-page-navigation="managed"] {
+    scroll-snap-type: none;
+    scroll-behavior: auto;
+    overscroll-behavior-y: none;
+  }
+  html[data-page-navigation="managed"] body {
+    touch-action: pan-x pinch-zoom;
+  }
   html {
     scroll-snap-type: y mandatory;
     scroll-padding-top: 0;
@@ -766,11 +774,40 @@ footer {
     z-index: 30;
     bottom: env(safe-area-inset-bottom, 0px);
     left: 50%;
-    transform: translateX(-50%);
+    transform: translateX(calc(-50% + var(--scrub-edge, 0px)));
     display: flex;
     align-items: center;
     height: 48px;
     white-space: nowrap;
+    padding: 0 8px;
+    touch-action: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+  }
+  .mobile-pagination::before {
+    content: "";
+    position: absolute;
+    inset: 7px 0;
+    z-index: -1;
+    border-radius: 30px;
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    background: rgba(248, 245, 239, 0.35);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: 0 3px 12px rgba(45, 40, 35, 0.04);
+    transition: transform .35s cubic-bezier(0.2, 0.9, 0.3, 1.2), background .2s,
+      box-shadow .2s;
+  }
+  .mobile-pagination.is-scrubbing::before {
+    transform: scale(1.12, 1.25);
+    background: rgba(248, 245, 239, 0.8);
+    box-shadow: 0 6px 22px rgba(45, 40, 35, 0.12), inset 0 1px
+      rgba(255, 255, 255, 0.8);
+  }
+  .mobile-pagination a:focus-visible {
+    outline: 1px solid var(--muted);
+    outline-offset: -3px;
+    border-radius: 20px;
   }
   .mobile-pagination a {
     display: grid;
@@ -782,10 +819,19 @@ footer {
     width: 5px;
     height: 5px;
     border: 1px solid var(--muted);
-    border-radius: 50%;
+    border-radius: 8px;
+    opacity: 0.45;
+    transition: width .25s cubic-bezier(0.2, 0.9, 0.3, 1.2), transform .25s,
+      opacity .2s;
   }
   .mobile-pagination a[aria-current] span {
     background: var(--muted);
+    width: 13px;
+    opacity: 1;
+    transform: scale(1.12);
+  }
+  .mobile-pagination.is-scrubbing a[aria-current] span {
+    transform: scale(1.3);
   }
 }
 
@@ -958,6 +1004,10 @@ footer {
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .mobile-pagination::before,
+  .mobile-pagination a span {
+    transition: none;
+  }
   html {
     scroll-behavior: auto;
   }

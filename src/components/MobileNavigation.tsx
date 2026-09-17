@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react';
 import useMobileSwipe from './useMobileSwipe';
+import usePageScrubber from './usePageScrubber';
+import usePageTransition from './usePageTransition';
 
 const pages = [
   ['top', 'AUXILIA'],
@@ -11,7 +13,9 @@ const pages = [
 ] as const;
 
 export default function MobileNavigation() {
-  useMobileSwipe();
+  const transition = usePageTransition();
+  useMobileSwipe(transition);
+  const { ref, scrubbing } = usePageScrubber(transition);
   const [active, setActive] = useState(0);
   useEffect(() => {
     const media = window.matchMedia('(max-width: 860px)');
@@ -56,10 +60,15 @@ export default function MobileNavigation() {
   }, []);
 
   return (
-    <nav className="mobile-pagination" aria-label="섹션 이동">
+    <nav
+      ref={ref}
+      className={`mobile-pagination${scrubbing ? ' is-scrubbing' : ''}`}
+      aria-label="섹션 이동: 길게 누른 뒤 좌우로 드래그하여 탐색"
+    >
       {pages.map(([id, label], index) => (
         <a
           href={`#${id}`}
+          draggable={false}
           key={id}
           aria-label={`${index + 1}. ${label}`}
           aria-current={active === index ? 'location' : undefined}
