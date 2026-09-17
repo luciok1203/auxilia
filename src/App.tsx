@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import Brandmark from './components/Brandmark';
+import MobileNavigation from './components/MobileNavigation';
 import './styles.css';
 
 const products = [
@@ -147,6 +148,7 @@ const App = () => {
   useSectionReveal();
   return (
     <>
+      <MobileNavigation />
       <div className={`edge-ui${edgeActive ? ' edge-active' : ''}`}>
         <header className="topbar">
           <a className="mini" href="#top">
@@ -161,9 +163,6 @@ const App = () => {
               )
             )}
           </nav>
-          <button onClick={() => setLoginOpen(true)} type="button">
-            LOGIN
-          </button>
         </header>
         <div className="side-note">PEOPLE · TECHNOLOGY · WELLNESS</div>
       </div>
@@ -304,6 +303,11 @@ const App = () => {
               ))}
             </div>
           </div>
+          <p className="mobile-notice">
+            AUXILIA는 LifeWave 공식 웹사이트가 아닌 독립적인 안내용
+            프로토타입입니다. 실제 공개 전 제품·사업 문구는 공식 자료와 현재
+            정책 기준으로 검토해야 합니다.
+          </p>
         </section>
       </main>
       <footer>
