@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { VIEWPORT_CHANGE } from '../viewport';
 import type { PageTransition } from './usePageTransition';
 
 export default function usePageScrubber(transition: PageTransition) {
@@ -150,6 +151,7 @@ export default function usePageScrubber(transition: PageTransition) {
     nav.addEventListener('keydown', key);
     nav.addEventListener('touchmove', blockTouch, { passive: false });
     window.addEventListener('resize', cancel);
+    window.addEventListener(VIEWPORT_CHANGE, cancel);
     window.addEventListener('blur', cancel);
     return () => {
       cancel();
@@ -162,6 +164,7 @@ export default function usePageScrubber(transition: PageTransition) {
       nav.removeEventListener('keydown', key);
       nav.removeEventListener('touchmove', blockTouch);
       window.removeEventListener('resize', cancel);
+      window.removeEventListener(VIEWPORT_CHANGE, cancel);
       window.removeEventListener('blur', cancel);
     };
   }, [transition]);

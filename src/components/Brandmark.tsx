@@ -11,9 +11,7 @@ function SilverWordmark() {
     const svg = svgRef.current;
     if (!svg) return;
     const lights = svg.querySelectorAll('fePointLight');
-    const motion = window.matchMedia(
-      '(prefers-reduced-motion: no-preference) and (pointer: fine)'
-    );
+    const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
     let bounds = svg.getBoundingClientRect();
     let frame = 0;
     let previousTime = 0;
@@ -44,7 +42,7 @@ function SilverWordmark() {
     const draw = (time: number) => {
       const dt = previousTime ? Math.min(time - previousTime, 64) : 16;
       previousTime = time;
-      const blend = 1 - Math.exp(-dt / 90);
+      const blend = 1 - Math.exp(-dt / (motion.matches ? 50 : 90));
       light.x += (target.x - light.x) * blend;
       light.y += (target.y - light.y) * blend;
       if (Math.abs(target.x - light.x) + Math.abs(target.y - light.y) < 0.05) {
@@ -57,7 +55,12 @@ function SilverWordmark() {
       frame = requestAnimationFrame(draw);
     };
     const move = (event: PointerEvent) => {
-      if (!motion.matches || !visible || event.pointerType === 'touch') return;
+      if (!visible || !event.isPrimary) return;
+      if (
+        event.pointerType === 'touch' &&
+        !(event.target instanceof Element && event.target.closest('.hero'))
+      )
+        return;
       // Cached logo-local geometry; no layout reads or React updates on pointermove.
       // Allow the source beyond the face so opposing bevels can catch the light.
       target.x = Math.max(
@@ -68,6 +71,10 @@ function SilverWordmark() {
         -240,
         Math.min(400, ((event.clientY - bounds.top) / bounds.height) * 160)
       );
+      if (motion.matches) {
+        target.x = REST_LIGHT.x + (target.x - REST_LIGHT.x) * 0.25;
+        target.y = REST_LIGHT.y + (target.y - REST_LIGHT.y) * 0.25;
+      }
       if (!frame) frame = requestAnimationFrame(draw);
     };
     const resize = new ResizeObserver(measure);
@@ -78,6 +85,7 @@ function SilverWordmark() {
     });
     visibility.observe(svg);
     window.addEventListener('pointermove', move, { passive: true });
+    window.addEventListener('pointerdown', move, { passive: true });
     window.addEventListener('scroll', measure, { passive: true });
     window.addEventListener('resize', measure);
     window.addEventListener('blur', reset);
@@ -87,6 +95,7 @@ function SilverWordmark() {
       resize.disconnect();
       visibility.disconnect();
       window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerdown', move);
       window.removeEventListener('scroll', measure);
       window.removeEventListener('resize', measure);
       window.removeEventListener('blur', reset);

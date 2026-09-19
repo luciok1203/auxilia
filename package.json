@@ -7,6 +7,7 @@
     "dev": "vite",
     "build": "tsc -b && vite build",
     "lint": "biome lint .",
+    "test:mobile": "node scripts/mobile-qa.cjs",
     "check:types": "tsc",
     "check:format": "biome check .",
     "check:unused": "knip",
@@ -16,6 +17,11 @@
     "ready": "yarn fix-all && yarn build"
   },
   "dependencies": {
+    "@fontsource-variable/libre-baskerville": "^5.3.0",
+    "@fontsource-variable/noto-sans-kr": "^5.3.0",
+    "@fontsource-variable/noto-serif-kr": "^5.3.0",
+    "@fontsource/arimo": "^5.3.0",
+    "@fontsource/tinos": "^5.3.0",
     "react": "^19.1.0",
     "react-dom": "^19.1.0"
   },

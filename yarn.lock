@@ -299,6 +299,41 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@fontsource-variable/libre-baskerville@npm:^5.3.0":
+  version: 5.3.0
+  resolution: "@fontsource-variable/libre-baskerville@npm:5.3.0"
+  checksum: 10c0/aafd51ac41df15388bf242ee83ac0d783df399708f77e2ecdd2b09c55ebe59c775409014d55de090396315274cea6e5c738769325d8cd8694d654b0114c7d735
+  languageName: node
+  linkType: hard
+
+"@fontsource-variable/noto-sans-kr@npm:^5.3.0":
+  version: 5.3.0
+  resolution: "@fontsource-variable/noto-sans-kr@npm:5.3.0"
+  checksum: 10c0/cedf8b6327972072b360cc07c41814cfa7a4b82beb4538094d384bbf26e0f14c61869edafe106449d535a61c86b0aab61487244590cf8fddeb0aea734e8aaebd
+  languageName: node
+  linkType: hard
+
+"@fontsource-variable/noto-serif-kr@npm:^5.3.0":
+  version: 5.3.0
+  resolution: "@fontsource-variable/noto-serif-kr@npm:5.3.0"
+  checksum: 10c0/7395e0a8236a0feab50971b5679f896609393fc0ac5a259b0ee2df01f32fee53e62e52fd5c77b742de4b7e02d1b057f629e84a565d19b1000dfd6ccfed3736dc
+  languageName: node
+  linkType: hard
+
+"@fontsource/arimo@npm:^5.3.0":
+  version: 5.3.0
+  resolution: "@fontsource/arimo@npm:5.3.0"
+  checksum: 10c0/87cfd2a0a184ba7091d056906427181220ed1492ab6bede6dca1e260d69596b0380abfe578298ba41de3a9b1d3279e7f2ce86e95a96191501868d24552573a8a
+  languageName: node
+  linkType: hard
+
+"@fontsource/tinos@npm:^5.3.0":
+  version: 5.3.0
+  resolution: "@fontsource/tinos@npm:5.3.0"
+  checksum: 10c0/a6cbae046206235b5f5bd490205c0ef84a6b0e7f0b86a34a7b5c36f4ac6af844dc7ee1d55a691b9e2ebe0076614e8128a6c39275545f2685644c964d6096d072
+  languageName: node
+  linkType: hard
+
 "@isaacs/cliui@npm:^8.0.2":
   version: 8.0.2
   resolution: "@isaacs/cliui@npm:8.0.2"
@@ -2144,6 +2179,11 @@ __metadata:
   resolution: "wafflestudio-2025-fe-seminar-template@workspace:."
   dependencies:
     "@biomejs/biome": "npm:1.9.4"
+    "@fontsource-variable/libre-baskerville": "npm:^5.3.0"
+    "@fontsource-variable/noto-sans-kr": "npm:^5.3.0"
+    "@fontsource-variable/noto-serif-kr": "npm:^5.3.0"
+    "@fontsource/arimo": "npm:^5.3.0"
+    "@fontsource/tinos": "npm:^5.3.0"
     "@types/node": "npm:^22.15.29"
     "@types/react": "npm:^19.1.2"
     "@types/react-dom": "npm:^19.1.2"

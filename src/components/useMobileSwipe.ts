@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { VIEWPORT_CHANGE, getPageHeight } from '../viewport';
 import type { PageTransition } from './usePageTransition';
 
 // Input adapters only: viewport movement belongs to navigateToPage.
@@ -70,7 +71,7 @@ export default function useMobileSwipe(transition: PageTransition) {
       event.preventDefault();
       gesture.delta = delta;
       gesture.lastTime = performance.now();
-      const threshold = Math.min(80, Math.max(48, window.innerHeight * 0.12));
+      const threshold = Math.min(80, Math.max(48, getPageHeight() * 0.12));
       if (!gesture.committed && Math.abs(delta) >= threshold) {
         gesture.committed = true;
         transition.navigateToPage(gesture.index + Math.sign(delta));
@@ -130,7 +131,7 @@ export default function useMobileSwipe(transition: PageTransition) {
         event.deltaMode === 1
           ? 16
           : event.deltaMode === 2
-            ? window.innerHeight
+            ? getPageHeight()
             : 1;
       wheelDelta += event.deltaY * unit;
       if (Math.abs(wheelDelta) >= 60) {
@@ -192,6 +193,7 @@ export default function useMobileSwipe(transition: PageTransition) {
     window.addEventListener('touchend', end);
     window.addEventListener('touchcancel', cancelGesture);
     window.addEventListener('resize', cancelGesture);
+    window.addEventListener(VIEWPORT_CHANGE, cancelGesture);
     window.addEventListener('wheel', wheel, { passive: false });
     window.addEventListener('click', click);
     window.addEventListener('keydown', key);
@@ -202,6 +204,7 @@ export default function useMobileSwipe(transition: PageTransition) {
       window.removeEventListener('touchend', end);
       window.removeEventListener('touchcancel', cancelGesture);
       window.removeEventListener('resize', cancelGesture);
+      window.removeEventListener(VIEWPORT_CHANGE, cancelGesture);
       window.removeEventListener('wheel', wheel);
       window.removeEventListener('click', click);
       window.removeEventListener('keydown', key);

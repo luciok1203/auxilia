@@ -67,7 +67,7 @@ function MobileMenu({ transition }: { transition: PageTransition }) {
     } else if (unlock.current) {
       const delay = window.matchMedia('(prefers-reduced-motion: reduce)')
         .matches
-        ? 0
+        ? 180
         : 380;
       timer = setTimeout(() => {
         unlock.current?.();

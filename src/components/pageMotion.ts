@@ -2,9 +2,8 @@
 const PAGE_TRANSITION_MS = 450;
 
 export function pageMotion(elapsed: number, reducedMotion: boolean) {
-  const progress = reducedMotion
-    ? 1
-    : Math.max(0, Math.min(1, elapsed / PAGE_TRANSITION_MS));
+  const duration = reducedMotion ? 180 : PAGE_TRANSITION_MS;
+  const progress = Math.max(0, Math.min(1, elapsed / duration));
   // Peak speed at 1/4, followed by a long, monotonic deceleration.
   const eased = Math.max(
     0,

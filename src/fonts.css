@@ -1,0 +1,10 @@
+/* Bundled WOFF2 assets; no local() lookup or third-party runtime font request. */
+
+:root {
+  --font-logo: "Tinos", "Noto Serif KR Variable", serif;
+  --font-serif: "Libre Baskerville Variable", "Noto Serif KR Variable", serif;
+  --font-sans: "Arimo", "Noto Sans KR Variable", sans-serif;
+  font-synthesis: none;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
