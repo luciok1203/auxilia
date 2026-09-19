@@ -163,6 +163,7 @@ export default function useMobileSwipe(transition: PageTransition) {
       transition.navigateToPage(index);
     };
     const key = (event: KeyboardEvent) => {
+      if (document.documentElement.dataset.menuLocked) return;
       if (
         !media.matches ||
         event.defaultPrevented ||

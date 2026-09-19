@@ -57,20 +57,19 @@ function createPageTransition() {
     if (Math.abs(destination - from) < 0.5) return;
     moving = true;
     const start = performance.now();
-    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)');
     resizeAnimation = () => {
       const nextHeight = getPageHeight();
       from *= nextHeight / layoutHeight;
       layoutHeight = nextHeight;
       destination = window.scrollY + list[index].getBoundingClientRect().top;
-      const { eased } = pageMotion(performance.now() - start, reduced.matches);
+      const { eased } = pageMotion(performance.now() - start);
       window.scrollTo({
         top: from + (destination - from) * eased,
         behavior: 'instant',
       });
     };
     const tick = (now: number) => {
-      const { eased, complete } = pageMotion(now - start, reduced.matches);
+      const { eased, complete } = pageMotion(now - start);
       window.scrollTo({
         top: complete ? destination : from + (destination - from) * eased,
         behavior: 'instant',

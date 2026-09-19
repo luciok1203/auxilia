@@ -42,8 +42,9 @@
 - Existing discrete/latest-target RAF animator and normal **450ms** curve remain.
   All navigation adapters still call the same controller. Touch/swipe adapter was
   not replaced, and native snap remains disabled only in managed mobile mode.
-- Reduced motion retains feedback with **180ms**, no spring easing for controls,
-  and a smaller/faster light response; it no longer disables the whole experience.
+- Page transitions use **450ms for both motion preferences**. Reduced motion
+  retains **180ms decorative control feedback**, no spring easing for controls,
+  and a smaller/faster light response. It does not accelerate page navigation.
 - Pointer Events now let touch presses/drags over the hero move its point light.
   They never prevent scrolling or intercept the page swipe adapter. No idle RAF.
 - Mobile section reveal uses opacity only. A second transformed reveal layer was
@@ -126,3 +127,40 @@ References: [VisualViewport](https://developer.mozilla.org/en-US/docs/Web/API/Vi
   `useMobileSwipe.ts`, `usePageScrubber.ts`, `pageMotion.ts`, `MobileMenu.tsx`,
   `Brandmark.tsx`. No replacement navigation engine or gesture library.
 - Verification: `scripts/mobile-qa.cjs`, this document.
+
+## iPhone follow-up (2026-09-19)
+
+The user confirmed iOS Reduce Motion was enabled. The prior 180ms page duration
+therefore explained the faster motion versus desktop's 450ms. Removed this page
+duration branch; decorative reductions remain. The timing figures above describe
+the earlier implementation, not the current reduced-motion navigation duration.
+
+The screenshots also show a paper-background seam descending by approximately
+one fixed increment per page. The body used an implicitly repeating `100vh` image
+with `background-attachment: fixed`, while sections use the smaller visible height.
+iOS has [documented fixed-background differences](https://bugs.webkit.org/show_bug.cgi?id=275247).
+If attachment scrolls, each page advances the tile seam by `100vh - appHeight`.
+Mobile now uses a solid body base and the existing `body::after` as a real fixed,
+non-repeating paper layer, sized to visual-height. The desktop background is unchanged.
+Regression QA forces scrolling attachment with a 740px layout / 700px visual
+viewport and compares the same background gutter pixels on all six pages.
+This is a targeted desktop-engine simulation; actual iPhone verification remains required.
+
+### Drawer timing and text-paint stability
+
+Drawer, overlay and hamburger-line transitions now share a 360ms duration in both
+motion preferences (initially unified at 480ms, then shortened for responsiveness).
+They use cubic-bezier(.7, 0, .3, 1), also used by the 450ms page controller: slow
+endpoints and a faster central phase, without overshoot. Reduced-motion preferences
+still reduce decorative button press motion. Close cleanup follows transform's
+transitionend, with a timeout fallback and protection against rapid reopening.
+
+Removed the fixed-body/top/overflow toggle and unconditional scroll restoration.
+Those layout changes could invalidate Safari's text paint layers when closing.
+Background inertness and non-passive touch/wheel interception now lock input,
+with keyboard navigation blocked while locked. The drawer retains its own scrolling.
+Ordinary close leaves document geometry and scroll position untouched; actual
+viewport resizing still corrects the saved section-relative position.
+Chromium/WebKit QA checks timing parity, background wheel/keyboard lock, unchanged
+scroll position, X/overlay/ESC and resize while open. Actual iPhone paint behavior
+still requires device validation; desktop WebKit is not proof of flicker removal.

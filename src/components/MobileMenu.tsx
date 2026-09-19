@@ -1,7 +1,8 @@
-import { memo, useEffect, useRef, useState } from 'react';
+import { type CSSProperties, memo, useEffect, useRef, useState } from 'react';
 import type { PageTransition } from './usePageTransition';
 
 const items = ['About', 'LifeWave', 'Products', 'Survey', 'Business'];
+const MENU_TRANSITION_MS = 360;
 
 function MobileMenu({ transition }: { transition: PageTransition }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -12,29 +13,49 @@ function MobileMenu({ transition }: { transition: PageTransition }) {
 
   useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | undefined;
+    let removeEndListener: (() => void) | undefined;
     if (menuOpen) {
       pending.current = undefined;
       if (!unlock.current) {
         const page = transition.selected();
         transition.cancel();
         const root = document.documentElement;
-        const body = document.body;
         const y = window.scrollY;
-        const previous = {
-          position: body.style.position,
-          top: body.style.top,
-          width: body.style.width,
-          overflow: body.style.overflow,
-          rootOverflow: root.style.overflow,
-        };
+        const section = transition.pages()[page];
+        const oldTop = section ? y + section.getBoundingClientRect().top : y;
+        const oldHeight = section?.getBoundingClientRect().height || 1;
         root.dataset.menuLocked = 'true';
-        root.style.overflow = 'hidden';
-        Object.assign(body.style, {
-          position: 'fixed',
-          top: `${-y}px`,
-          width: '100%',
-          overflow: 'hidden',
-        });
+        // Keep the document and Safari's text paint layers in place. Lock user
+        // input instead of switching body to fixed and restoring scroll on close.
+        const blockScroll = (event: TouchEvent | WheelEvent) => {
+          if (
+            event.target instanceof Element &&
+            event.target.closest('.mobile-drawer')
+          )
+            return;
+          if (event.cancelable) event.preventDefault();
+        };
+        const blockKeys = (event: KeyboardEvent) => {
+          if (
+            event.target instanceof Element &&
+            event.target.closest('.mobile-drawer')
+          )
+            return;
+          if (
+            [
+              'ArrowUp',
+              'ArrowDown',
+              'PageUp',
+              'PageDown',
+              'Home',
+              'End',
+            ].includes(event.key)
+          )
+            event.preventDefault();
+        };
+        document.addEventListener('touchmove', blockScroll, { passive: false });
+        document.addEventListener('wheel', blockScroll, { passive: false });
+        document.addEventListener('keydown', blockKeys);
         const background = Array.from(
           document.querySelectorAll<HTMLElement>(
             '.hero, main, footer, .mobile-pagination'
@@ -45,31 +66,29 @@ function MobileMenu({ transition }: { transition: PageTransition }) {
           el.inert = true;
         });
         unlock.current = () => {
-          Object.assign(body.style, {
-            position: previous.position,
-            top: previous.top,
-            width: previous.width,
-            overflow: previous.overflow,
-          });
-          root.style.overflow = previous.rootOverflow;
+          document.removeEventListener('touchmove', blockScroll);
+          document.removeEventListener('wheel', blockScroll);
+          document.removeEventListener('keydown', blockKeys);
           delete root.dataset.menuLocked;
           background.forEach((el, index) => {
             el.inert = inert[index];
           });
-          const section = transition.pages()[page];
-          const restoredY = section
-            ? window.scrollY + section.getBoundingClientRect().top
-            : y;
-          window.scrollTo({ top: restoredY, behavior: 'instant' });
+          if (window.matchMedia('(max-width: 860px)').matches && section) {
+            const rect = section.getBoundingClientRect();
+            const restoredY =
+              window.scrollY +
+              rect.top +
+              ((y - oldTop) / oldHeight) * rect.height;
+            // Only a real geometry change (e.g. rotation) needs a correction.
+            if (Math.abs(window.scrollY - restoredY) > 0.5)
+              window.scrollTo({ top: restoredY, behavior: 'instant' });
+          }
         };
       }
       toggle.current?.focus({ preventScroll: true });
     } else if (unlock.current) {
-      const delay = window.matchMedia('(prefers-reduced-motion: reduce)')
-        .matches
-        ? 180
-        : 380;
-      timer = setTimeout(() => {
+      const finish = () => {
+        if (!unlock.current) return;
         unlock.current?.();
         unlock.current = undefined;
         toggle.current?.focus({ preventScroll: true });
@@ -77,9 +96,24 @@ function MobileMenu({ transition }: { transition: PageTransition }) {
         pending.current = undefined;
         if (action) action();
         else transition.navigateToPage(transition.nearest());
-      }, delay);
+      };
+      const drawer = container.current?.querySelector('.mobile-drawer');
+      const onEnd = (event: Event) => {
+        if (
+          event.target === drawer &&
+          (event as TransitionEvent).propertyName === 'transform'
+        )
+          finish();
+      };
+      drawer?.addEventListener('transitionend', onEnd);
+      removeEndListener = () =>
+        drawer?.removeEventListener('transitionend', onEnd);
+      timer = setTimeout(finish, MENU_TRANSITION_MS + 60);
     }
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      removeEndListener?.();
+    };
   }, [menuOpen, transition]);
 
   useEffect(() => {
@@ -111,6 +145,7 @@ function MobileMenu({ transition }: { transition: PageTransition }) {
     <div
       ref={container}
       className={`mobile-menu${menuOpen ? ' is-open' : ''}`}
+      style={{ '--menu-duration': `${MENU_TRANSITION_MS}ms` } as CSSProperties}
       role={menuOpen ? 'dialog' : undefined}
       aria-modal={menuOpen ? true : undefined}
       aria-label={menuOpen ? '모바일 메뉴' : undefined}

@@ -604,6 +604,20 @@ footer {
   body {
     overflow-x: clip;
     padding-bottom: var(--scroll-tail, 0px);
+    isolation: isolate;
+    background: var(--paper);
+  }
+  body::after {
+    /* Do not tile a 100vh image on a document made of visual-viewport pages.
+       iOS may scroll background-attachment:fixed; its tile boundary then drifts
+       by (100vh - page height) on every page. This is an actual fixed layer. */
+    z-index: -1;
+    top: var(--viewport-top, 0px);
+    bottom: auto;
+    height: var(--visual-height, 100dvh);
+    background: var(--page-background);
+    background-size: 100% 100%;
+    background-repeat: no-repeat;
   }
   #root {
     width: 100%;
@@ -877,7 +891,8 @@ footer {
     -webkit-backdrop-filter: blur(3px);
     opacity: 0;
     visibility: hidden;
-    transition: opacity 380ms ease-out, visibility 380ms;
+    transition: opacity var(--menu-duration) cubic-bezier(0.7, 0, 0.3, 1),
+      visibility var(--menu-duration);
     pointer-events: none;
   }
   .is-open .mobile-menu-overlay {
@@ -898,8 +913,8 @@ footer {
     box-shadow: -12px 0 48px rgba(45, 40, 35, 0.08);
     transform: translateX(105%);
     visibility: hidden;
-    transition: transform 380ms cubic-bezier(0.22, 0.8, 0.3, 1.025), visibility
-      380ms;
+    transition: transform var(--menu-duration) cubic-bezier(0.7, 0, 0.3, 1),
+      visibility var(--menu-duration);
     overflow-y: auto;
     overscroll-behavior: contain;
     touch-action: pan-y;
@@ -991,7 +1006,7 @@ footer {
     width: 18px;
     height: 1px;
     background: currentColor;
-    transition: transform 380ms cubic-bezier(0.22, 0.8, 0.3, 1.025);
+    transition: transform var(--menu-duration) cubic-bezier(0.7, 0, 0.3, 1);
   }
   .mobile-menu-toggle span:first-child {
     transform: translateY(-3px);
@@ -1031,9 +1046,8 @@ footer {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .mobile-menu *,
-  .mobile-menu *::before {
-    transition-duration: 180ms !important;
+  .mobile-menu-toggle,
+  .mobile-drawer nav button {
     transition-timing-function: ease-out !important;
   }
   .mobile-pagination::before,

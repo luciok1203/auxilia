@@ -206,7 +206,7 @@ async function run(name, engine) {
       await settled(page, 1);
       const swipeTiming = await timeInput(page, 'swipe');
       await settled(page, 2);
-      const expectedDuration = reducedMotion === 'reduce' ? 180 : 450;
+      const expectedDuration = 450;
       for (const timing of [tapTiming, swipeTiming]) {
         assert.ok(timing.count > 2);
         assert.ok(
@@ -230,38 +230,100 @@ async function run(name, engine) {
       await links.nth(3).tap();
       await resizeVisible(page, 620);
       await settled(page, 3);
+      const beforeMenu = await page.evaluate(() => window.scrollY);
       await page.locator('.mobile-menu-toggle').tap();
+      await page.waitForTimeout(550);
+      await page.keyboard.press('PageDown');
+      const prevented = await page
+        .locator('.mobile-menu-toggle')
+        .evaluate((el) => {
+          const event = new WheelEvent('wheel', {
+            deltaY: 200,
+            bubbles: true,
+            cancelable: true,
+          });
+          el.dispatchEvent(event);
+          return event.defaultPrevented;
+        });
+      assert.equal(prevented, true);
+      if (name === 'Chromium') await page.mouse.wheel(0, 200);
+      assert.equal(await page.evaluate(() => window.scrollY), beforeMenu);
       await page.locator('.mobile-menu-toggle').tap();
-      await page.waitForTimeout(450);
+      await page.waitForFunction(
+        () => !document.documentElement.dataset.menuLocked
+      );
+      assert.equal(await page.evaluate(() => window.scrollY), beforeMenu);
       assert.equal(await page.evaluate(() => document.body.style.position), '');
       await page.locator('.mobile-menu-toggle').tap();
       await page
         .locator('.mobile-menu-overlay')
         .tap({ position: { x: 5, y: 100 } });
-      await page.waitForTimeout(450);
+      await page.waitForFunction(
+        () => !document.documentElement.dataset.menuLocked
+      );
       assert.equal(await page.evaluate(() => document.body.style.position), '');
       const durations = await page
         .locator('.mobile-menu-toggle span')
         .first()
         .evaluate((el) => getComputedStyle(el).transitionDuration);
-      assert.notEqual(durations, '0s');
+      assert.equal(durations, '0.36s');
+      assert.ok(
+        await page
+          .locator('.mobile-drawer')
+          .evaluate((el) =>
+            getComputedStyle(el).transitionTimingFunction.startsWith(
+              'cubic-bezier(0.7, 0, 0.3, 1)'
+            )
+          )
+      );
+      const drawerDuration = await page
+        .locator('.mobile-drawer')
+        .evaluate((el) => getComputedStyle(el).transitionDuration);
+      assert.ok(
+        drawerDuration.split(',').every((value) => value.trim() === '0.36s')
+      );
       // Long press is retained on touch and reduced-motion preferences.
       const nav = page.locator('.mobile-pagination');
+      await page.waitForTimeout(550); // Separate synthetic mouse input from touch compatibility events.
       const box = await links.nth(3).boundingBox();
       await page.mouse.move(box.x + box.width / 2, box.y + 10);
       await page.mouse.down();
-      await page.waitForTimeout(250);
+      await page.waitForFunction(() =>
+        document
+          .querySelector('.mobile-pagination')
+          .classList.contains('is-scrubbing')
+      );
       assert.match(await nav.getAttribute('class'), /is-scrubbing/);
       await page.mouse.up();
       await page.locator('.mobile-menu-toggle').tap();
       assert.equal(
-        await page.evaluate(() => document.body.style.position),
-        'fixed'
+        await page.evaluate(() => document.documentElement.dataset.menuLocked),
+        'true'
       );
       await resizeVisible(page, 580);
       await page.keyboard.press('Escape');
-      await page.waitForTimeout(450);
+      await page.waitForFunction(
+        () => !document.documentElement.dataset.menuLocked
+      );
       assert.equal(await page.evaluate(() => document.body.style.position), '');
+      await settled(page, 3);
+      // Reopening must cancel pending close cleanup; selection waits for closing.
+      await page.locator('.mobile-menu-toggle').tap();
+      await page.waitForTimeout(550);
+      await page.locator('.mobile-menu-toggle').tap();
+      await page.waitForTimeout(100);
+      await page.locator('.mobile-menu-toggle').tap();
+      await page.waitForTimeout(600);
+      assert.equal(
+        await page.evaluate(() => document.documentElement.dataset.menuLocked),
+        'true'
+      );
+      await page.locator('.mobile-drawer nav button').first().tap();
+      await page.waitForFunction(
+        () => !document.documentElement.dataset.menuLocked
+      );
+      await settled(page, 1);
+      await links.nth(3).tap();
       await settled(page, 3);
       // Pinch zoom must not resize the document. Keyboard must not displace the page.
       await resizeVisible(page, 290, 2);
@@ -317,6 +379,36 @@ async function run(name, engine) {
       );
       await page.close();
     }
+    // iOS can treat attachment:fixed as scrolling. A taller CSS/layout viewport
+    // must not leave a repeating background seam that advances with each page.
+    const paper = await browser.newPage({
+      viewport: { width: 390, height: 740 },
+      isMobile: true,
+      hasTouch: true,
+    });
+    await installViewport(paper, 700);
+    await paper.goto(url);
+    await paper.evaluate(() => document.fonts.ready);
+    await paper.addStyleTag({
+      content: 'body { background-attachment: scroll !important; }',
+    });
+    let background;
+    for (let index = 0; index < 6; index++) {
+      if (index) await paper.locator('.mobile-pagination a').nth(index).tap();
+      await settled(paper, index);
+      const pixels = await paper.screenshot({
+        clip: { x: 2, y: 90, width: 2, height: 480 },
+      });
+      background ??= pixels;
+      assert.ok(
+        background.equals(pixels),
+        `${name}: background shifted on page ${index}`
+      );
+    }
+    await paper.close();
+    report(
+      `${name}: fixed paper background pixels unchanged across all six pages`
+    );
     const desktop = await browser.newPage({
       viewport: { width: 1440, height: 900 },
     });

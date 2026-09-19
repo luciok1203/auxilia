@@ -8,11 +8,10 @@
     "build": "tsc -b && vite build",
     "lint": "biome lint .",
     "test:mobile": "node scripts/mobile-qa.cjs",
-    "check:types": "tsc",
     "check:format": "biome check .",
     "check:unused": "knip",
-    "check-all": "yarn check:types && yarn check:format && yarn check:unused",
     "fix": "biome check --write --unsafe .",
+    "check-all": "yarn check:format && yarn check:unused",
     "fix-all": "yarn fix && yarn check-all",
     "ready": "yarn fix-all && yarn build"
   },
